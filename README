@@ -1,0 +1,50 @@
+MODEL PREDICTIVE CONTROL
+
+
+
+Model parameters:
+
+   Car State
+   x: current x location
+   y: current y location
+   psi: current angle
+   v: current speed
+   cte: current cross track error
+   epsi: current psi error
+
+  Actuators
+  steer_angle: range of -1, 1
+  acceleration: range of -0.5, 0.5
+
+ N: integer time steps horizon for the trajectory prediction model
+ dt: time step duration in milliseconds
+
+Comments on the implementation
+ It took me a while to understand that the actuator for the steering wheel is inversed: a minus sign is required.
+
+ To successfuly implement this model there are 12 key points to understand:
+ //KEY POINT #1 transform waypoints to car coordinate before computing the polynomial
+          // (1) start by translating
+          // (2) use -psi for the angle
+ KEY POINT #2 Mitigate the latency with a speed bias parameter
+ KEY POINT #3 evaluate the polynomial at x=0, y=0 since we are in car coordinates
+ KEY POINT #4 since we use a polynomial of order 3 compute its derivative in main()
+ KEY POINT #5 steer value is negatively signed
+ KEY POINT #6 Adjust N and dt for a fast smooth ride
+ KEY POINT #7 Adjust the speed parameter v
+ KEY POINT #8 Adjust the cost of steering too  much allows better speed
+ KEY POINT #9 Adjust the cost of steering unenvely allows smoother ride
+ KEY POINT #10 use a polynomial of order 3 and compute its derivative also in fg
+ KEY POINT #11 initialize the state
+ KEY POINT #12 At the end of solve() function, return the solution in the right order consistent with what main() expects
+
+ Reducing the prediction horizon allows higher speed
+ Increasing the cost penalty of steering too often allows increasing speed
+
+ Latency adjustment allows increasing sppeds
+
+ Waypoints are converted to car coordinates before computing the polynomial 3rd order polynomial.
+ If even faster speed is necessary: tighten the cost of moving the steering wheel and adjust N and dt.  
+ At this time the speed is set to 70 mph, the ride is smooth but the car drives the curves as if during a Grand Prix.     
+
+
